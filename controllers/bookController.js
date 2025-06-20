@@ -7,12 +7,12 @@ const {
 } = require("../services/bookService");
 
 const getAllBooks = async (req, res) => {
-    try {
-        const books = await getAllBooksService(req.query);
-        res.status(200).json(books);
-    } catch (err) {
-        res.status(500).json({ message: "Failed to fetch books", error: err.message });
-    }
+  try {
+    const data = await getAllBooksService(req.query);
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch books", error: error.message });
+  }
 };
 
 const getBookById = async (req, res) => {
@@ -52,7 +52,7 @@ const updateBook = async (req, res) => {
         if (!updatedBook) {
             return res.status(404).json({ message: "Book not found" });
         }
-        res.status(200).json(updatedBook);
+        res.status(200).json({ message: "Book updated successfully", updatedBook: updatedBook });
     } catch (err) {
         res.status(500).json({ message: "Failed to update book", error: err.message });
     }

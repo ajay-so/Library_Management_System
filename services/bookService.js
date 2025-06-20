@@ -1,12 +1,26 @@
 const Book = require("../models/bookModel");
 
 // Get all books
-const getAllBooksService = async () => {
-    try {
-        return await Book.find({});
-    } catch (error) {
-        throw new Error("Error fetching books: " + error.message);
-    }
+const getAllBooksService = async (query) => {
+  const { page = 1, limit = 5, title, author, category } = query;
+
+  let filter = {};
+  if (title) filter.title = new RegExp(title, "i");
+  if (author) filter.author = new RegExp(author, "i");
+  if (category) filter.category = new RegExp(category, "i");
+
+  const books = await Book.find(filter)
+    .skip((page - 1) * limit)
+    .limit(Number(limit));
+
+  const total = await Book.countDocuments(filter);
+
+  return {
+    total,
+    page: Number(page),
+    limit: Number(limit),
+    books,
+  };
 };
 
 // Get book by ID
