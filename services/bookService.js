@@ -1,4 +1,5 @@
 const Book = require("../models/bookModel");
+const applyPagination = require("../utils/pagination");
 
 // Get all books
 const getAllBooksService = async (query) => {
@@ -9,10 +10,10 @@ const getAllBooksService = async (query) => {
   if (author) filter.author = new RegExp(author, "i");
   if (category) filter.category = new RegExp(category, "i");
 
-  const books = await Book.find(filter)
-    .skip((page - 1) * limit)
-    .limit(Number(limit));
+  let dbQuery = Book.find(filter);
+  dbQuery = applyPagination(dbQuery, page, limit);
 
+  const books = await dbQuery;
   const total = await Book.countDocuments(filter);
 
   return {
