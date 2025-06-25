@@ -4,6 +4,7 @@ const {
     addBookService,
     updateBookService,
     deleteBookService,
+    uploadCoverService
 } = require("../services/bookService");
 
 const getAllBooks = async (req, res) => {
@@ -30,22 +31,25 @@ const getBookById = async (req, res) => {
 
 const addBook = async (req, res) => {
     try {
-        const { title, author, category, publishedYear, price, description } = req.body;
-        if (!title || !author || !category || !publishedYear || !price || !description) {
+        const author = req.user._id;
+        const { title, category, publishedYear, price, description } = req.body;
+        if (!title || !category || !publishedYear || !price || !description) {
             return res.status(400).json({ message: "All fields are required" });
         }
         const newBook = await addBookService({ title, author, category, publishedYear, price, description });
-        res.status(201).json(newBook);
+        res.status(201).json({ message: "Book added successfully", newBook });
     } catch (err) {
         res.status(500).json({ message: "Failed to add book", error: err.message });
     }
 };
 
+
 const updateBook = async (req, res) => {
     try {
+        const author = req.user._id;
         const { id } = req.params;
-        const { title, author, category, publishedYear, price, description } = req.body;
-        if (!title || !author || !category || !publishedYear || !price || !description) {
+        const { title, category, publishedYear, price, description } = req.body;
+        if ( !author || !category || !publishedYear || !price || !description) {
             return res.status(400).json({ message: "All fields are required" });
         }
         const updatedBook = await updateBookService(id, { title, author, category, publishedYear, price, description });
@@ -71,7 +75,31 @@ const deleteBook = async (req, res) => {
     }
 };
 
+const uploadBookCover = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const bookId = req.params.id;
+    const updatedBook = await uploadCoverService(bookId, req.file.path.replace(/\\/g, "/"));
+
+    if (!updatedBook) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    res.status(200).json({
+      message: "Cover image uploaded successfully",
+      data: updatedBook,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Upload failed", error: error.message });
+  }
+};
+
+
 module.exports = {
+    uploadBookCover,
     getAllBooks,
     getBookById,
     addBook,

@@ -3,14 +3,13 @@ const applyPagination = require("../utils/pagination");
 
 // Get all books
 const getAllBooksService = async (query) => {
-  const { page = 1, limit = 5, title, author, category } = query;
+  const { page = 1, limit = 5, title, category } = query;
 
-  let filter = {};
+  const filter = {};
   if (title) filter.title = new RegExp(title, "i");
-  if (author) filter.author = new RegExp(author, "i");
   if (category) filter.category = new RegExp(category, "i");
 
-  let dbQuery = Book.find(filter);
+  let dbQuery = Book.find(filter).populate("author", "name bio");
   dbQuery = applyPagination(dbQuery, page, limit);
 
   const books = await dbQuery;
@@ -43,7 +42,7 @@ const addBookService = async (bookData) => {
     } catch (error) {
         throw new Error("Error adding book: " + error.message);
     }
-};
+};  
 
 // Update an existing book
 const updateBookService = async (id, bookData) => {
@@ -67,7 +66,18 @@ const deleteBookService = async (id) => {
     }
 };
 
+// Upload cover image
+const uploadCoverService = async (bookId, filePath) => {
+  const updatedBook = await Book.findByIdAndUpdate(
+    bookId,
+    { coverImage: filePath },
+    { new: true }
+  );
+  return updatedBook;
+};
+
 module.exports = {
+    uploadCoverService,
     getAllBooksService,
     getBookByIdService,
     addBookService,

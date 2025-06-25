@@ -26,6 +26,10 @@ const BookSchema = new mongoose.Schema(
       required: [true, "Price is required"],
       min: [0, "Price must be positive"],
     },
+    coverImage: {
+      type: String, // path to image
+      default: ""
+    },
     description: {
       type: String,
       default: "",
